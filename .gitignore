@@ -1,0 +1,4 @@
+.idea/*
+.env
+.license
+vault_init.json

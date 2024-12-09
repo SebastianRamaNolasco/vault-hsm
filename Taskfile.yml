@@ -1,0 +1,87 @@
+version: '3'
+
+vars:
+  NAME: vault
+  SHELL: /bin/bash
+
+tasks:
+  default:
+    - task: rebuild
+
+  launch:
+    cmds:
+      - multipass launch --name {{ .NAME }} -c 2 -m 1G -d 10G lts
+#      - multipass info {{ .NAME }} --format json > multipass.json
+
+  install:
+    dotenv: [".license"]
+    cmds:
+      - |
+        multipass transfer ./scripts/startup.sh {{ .NAME }}:/tmp/startup.sh
+        multipass exec {{ .NAME }} -- sudo -E sh <<EOF
+        /tmp/startup.sh
+        echo VAULT_LICENSE=$VAULT_LICENSE > /etc/vault.d/vault.env
+        systemctl start vault
+        journalctl -xeu vault.service
+        EOF
+        sleep 5
+    silent: true
+
+  post-install:
+    cmds:
+      - |
+        ./scripts/10_vault_init.sh {{ .VAULT_ADDR }}
+        sed -i '' "s#VAULT_ADDR=.*#VAULT_ADDR='{{ .VAULT_ADDR }}'#g" .env
+        sed -i '' "s/VAULT_TOKEN=.*/VAULT_TOKEN=$(jq -r '.root_token' vault_init.json)/g" .env
+        echo "VAULT_ADDR: {{ .VAULT_ADDR }}"
+        echo "VAULT_TOKEN: $(jq -r '.root_token' vault_init.json)"
+    silent: true
+    vars:
+      VAULT_ADDR:
+        sh: echo "https://`multipass info {{ .NAME }} --format json | jq -r '.info.{{ .NAME }}.ipv4[0]'`:8200"
+
+  clean:
+    cmds:
+      - multipass stop {{ .NAME }}
+      - multipass delete --purge {{ .NAME }}
+    ignore_error: true
+    silent: true
+
+  shell:
+    cmd: multipass shell {{ .NAME }}
+
+  logs:
+    cmd: multipass exec {{ .NAME }} -- journalctl -u vault.service -f
+
+  unseal:
+    dotenv: [".env"]
+    cmd: ./scripts/20_vault_unseal.sh
+
+  rebuild:
+    cmds:
+      - task: clean
+      - task: launch
+      - task: install
+      - task: post-install
+
+  restart:
+    cmds:
+      - multipass stop {{ .NAME }}
+      - multipass start {{ .NAME }}
+
+  start:
+    cmds:
+      - multipass start {{ .NAME }}
+
+  stop:
+    cmds:
+      - multipass stop {{ .NAME }}
+
+  ui:
+    cmds:
+    - |
+      echo UI: https://{{.IP}}:8200
+      open https://{{.IP}}:8200
+    vars:
+      IP:
+        sh: multipass info {{ .NAME }} --format json | jq -r '.info.{{ .NAME }}.ipv4[0]'
