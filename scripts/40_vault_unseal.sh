@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -xe
 
 vault status
 sleep 3
