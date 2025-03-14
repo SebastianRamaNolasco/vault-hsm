@@ -12,7 +12,7 @@ tasks:
   launch:
     preconditions:
       - test -f .env
-      - test -f vault.hclic
+      - test -f /etc/vault.d/vault.hclic
     cmds:
       - multipass launch --name {{ .NAME }} -c 2 -m 1G -d 10G lts
 
