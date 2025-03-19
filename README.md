@@ -1,4 +1,4 @@
-# multipass-vault-hsm
+# vault with HSM
 This repository contains scripts and configurations to set up and manage a HashiCorp Vault instance with HSM (Hardware Security Module) support using SoftHSM and Multipass.
 
 ## Prerequisites
