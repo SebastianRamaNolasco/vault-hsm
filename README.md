@@ -48,6 +48,8 @@ task restart
 ```shell
 task logs
 ```
+##### OPTIONAL
+
 #### Configure Vault PKI Managed key
 ```shell
 vault write sys/managed-keys/pkcs11/vault_pki_key  \
