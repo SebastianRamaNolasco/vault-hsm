@@ -1,5 +1,5 @@
-# vault with HSM
-This repository contains scripts and configurations to set up and manage a HashiCorp Vault instance with HSM (Hardware Security Module) support using SoftHSM and Multipass.
+# Vault with HSM
+How to set up and manage a HashiCorp Vault instance with HSM (Hardware Security Module) support using SoftHSM and Multipass.
 
 ## Prerequisites
 - go-task (brew install go-task)
@@ -48,7 +48,7 @@ task restart
 ```shell
 task logs
 ```
-##### OPTIONAL
+## OPTIONAL
 
 #### Configure Vault PKI Managed key
 ```shell
